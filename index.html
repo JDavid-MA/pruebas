@@ -2,135 +2,96 @@
 <html lang="es">
 <head>
   <meta charset="utf-8">
-  <title>Registrar Paquetes</title>
+  <title>Zonas de Paquetes</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     * { box-sizing: border-box; }
     body { font-family: Arial, sans-serif; padding: 12px 16px; margin: 0; background: #f8f9fa; color: #1c1c1c; }
-
     .label { font-size: 11px; font-weight: bold; color: #444; margin-bottom: 4px; text-transform: uppercase; }
-
-    select, input[type=text], input[type=password] {
-      width: 100%; padding: 10px; margin-bottom: 10px;
-      border: 1px solid #ccc; border-radius: 6px; font-size: 16px;
-      background: white;
+    input[type=text], input[type=password] {
+      width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; background: #fff;
     }
-    select:focus, input:focus {
-      outline: none; border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,.2);
-    }
-
-    .btn {
-      width: 100%; padding: 11px; border: none; border-radius: 6px;
-      font-size: 14px; font-weight: bold; cursor: pointer; margin-bottom: 8px;
-    }
-    .btn-green { background: #1a6b2e; color: white; }
-    .btn-red   { background: #b71c1c; color: white; }
+    input:focus { outline: none; border-color: #1a73e8; box-shadow: 0 0 0 2px rgba(26,115,232,.2); }
+    .btn { width: 100%; padding: 11px; border: none; border-radius: 6px; font-size: 14px; font-weight: bold; cursor: pointer; margin-bottom: 8px; }
+    .btn-green { background: #1a6b2e; color: #fff; }
     .btn-gray  { background: #e0e0e0; color: #333; }
-    .btn-blue  { background: #0b57d0; color: white; }
-
+    .btn-blue  { background: #0b57d0; color: #fff; }
     .fila { display: flex; gap: 8px; }
     .fila .btn { flex: 1; }
     .fila input { flex: 1; margin-bottom: 8px; }
     .fila .btn-corto { flex: 0 0 auto; width: auto; padding: 11px 16px; }
 
-    /* Cámara en una franja baja: deja ver el resultado sin hacer scroll */
-    #lector-camara { width: 100%; height: 150px; margin-bottom: 8px; display: none; border-radius: 8px; overflow: hidden; background: #000; position: relative; }
+    #lector-camara { width: 100%; height: 150px; margin-bottom: 8px; display: none; border-radius: 8px; overflow: hidden; background: #000; }
     #lector-camara video { width: 100% !important; height: 150px !important; object-fit: cover; }
     #lector-camara img { display: none; }
     #btnDetener { display: none; }
 
+    #tarjeta { border-radius: 10px; padding: 12px; background: #fff; border: 1px solid #ddd; margin-bottom: 10px; min-height: 120px; }
+    #tarjeta .trk { font-family: Consolas, monospace; font-size: 13px; color: #595959; }
+    #tarjeta .zona { font-size: 44px; font-weight: 800; color: #fff; border-radius: 8px; padding: 10px; margin: 6px 0; text-align: center; line-height: 1.1; }
+    #tarjeta .zona .sub { font-size: 18px; font-weight: 600; margin-top: 4px; }
+    #tarjeta .dir { font-size: 17px; font-weight: bold; margin-top: 4px; }
+    #tarjeta .cliente { font-size: 15px; margin-top: 2px; }
+    #tarjeta .origen { font-size: 14px; color: #333; margin-top: 6px; }
+    #tarjeta .mapa { display: block; margin-top: 10px; padding: 10px; border-radius: 6px; background: #e8f0fe; color: #0b57d0;
+                     text-align: center; font-weight: bold; text-decoration: none; }
+    #tarjeta .vacio { color: #595959; text-align: center; padding-top: 40px; }
 
-    .estado { display: flex; justify-content: space-between; align-items: baseline; margin: 6px 0; }
-    .counter { font-size: 28px; font-weight: bold; color: #1a73e8; }
-    .counter span { font-size: 11px; color: #595959; font-weight: normal; }
-    #pendientes { font-size: 13px; color: #795548; }
-
-    .msg {
-      padding: 9px 12px; border-radius: 6px; margin-bottom: 10px;
-      font-size: 14px; text-align: center; display: none;
-    }
+    .msg { padding: 9px 12px; border-radius: 6px; margin-bottom: 10px; font-size: 14px; text-align: center; display: none; }
     .msg.ok   { background: #e6f4ea; color: #1e6d38; display: block; }
     .msg.err  { background: #fce8e6; color: #a50e0e; display: block; }
-    .msg.warn { background: #fff8e1; color: #795548; display: block; }
-
-    .confirm-box {
-      background: #fff8e1; border: 2px solid #f9a825; border-radius: 8px;
-      padding: 12px; margin-bottom: 10px; display: none;
-    }
-    .confirm-box p { margin: 0 0 10px; font-size: 15px; color: #333; }
-    .confirm-row { display: flex; gap: 8px; }
-    .confirm-row .btn { margin-bottom: 0; flex: 1; }
-
-    .last { font-size: 11px; color: #595959; word-break: break-all; text-align: center; }
+    #info { font-size: 12px; color: #595959; text-align: center; margin: 4px 0 10px; }
     .divider { border: none; border-top: 1px solid #e0e0e0; margin: 12px 0; }
   </style>
-
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" type="text/javascript"></script>
 </head>
 <body>
 
-  <!-- ===== PANTALLA DE ACCESO ===== -->
   <div id="login" style="display:none">
-    <div class="label">Clave de acceso</div>
+    <div class="label">Clave de Zonas</div>
     <input type="password" id="inputClave" placeholder="Escribe la clave" autocomplete="current-password"
            onkeydown="if (event.key === 'Enter') entrar()">
     <button class="btn btn-green" onclick="entrar()">Entrar</button>
     <div id="msgLogin" class="msg"></div>
   </div>
 
-  <!-- ===== APLICACIÓN ===== -->
   <div id="app" style="display:none">
-
-  <div class="label">Motorizado</div>
-  <select id="motorizado" onchange="onSelectMotorizado()">
-    <option value="">— Seleccionar —</option>
-  </select>
-
-  <div class="fila">
-    <button type="button" class="btn btn-blue" onclick="iniciarCamara()">📷 Cámara</button>
-    <button type="button" class="btn btn-blue" onclick="abrirFoto()">🖼️ Foto</button>
-  </div>
-  <input type="file" id="inputFoto" accept="image/*" capture="environment" style="display:none" onchange="leerFoto(event)">
-
-  <div id="lector-camara"></div>
-  <button type="button" id="btnDetener" class="btn btn-gray" onclick="detenerCamara()">✕ Cerrar cámara</button>
-
-  <div class="confirm-box" id="confirmBox">
-    <p id="confirmMsg"></p>
-    <div class="confirm-row">
-      <button class="btn btn-gray" onclick="responder(false)">Cancelar</button>
-      <button class="btn btn-red" id="confirmSi" onclick="responder(true)">Sí</button>
+    <div class="fila">
+      <button type="button" class="btn btn-blue" onclick="iniciarCamara()">📷 Cámara</button>
+      <button type="button" class="btn btn-blue" onclick="abrirFoto()">🖼️ Foto</button>
     </div>
+    <input type="file" id="inputFoto" accept="image/*" capture="environment" style="display:none" onchange="leerFoto(event)">
+    <div id="lector-camara"></div>
+    <button type="button" id="btnDetener" class="btn btn-gray" onclick="detenerCamara()">✕ Cerrar cámara</button>
+
+    <div id="msg" class="msg"></div>
+    <div id="tarjeta" aria-live="polite"><div class="vacio">Escanea un paquete para ver su zona</div></div>
+
+    <div class="fila">
+      <input type="text" id="tracking" placeholder="Escribir o pistola…" onkeydown="if (event.key === 'Enter') buscarEscrito()" autocomplete="off">
+      <button class="btn btn-green btn-corto" onclick="buscarEscrito()">Ver</button>
+    </div>
+    <div id="info"></div>
+
+    <hr class="divider">
+    <button class="btn btn-gray" onclick="actualizarDatos(true)">⟳ Actualizar datos</button>
+    <button class="btn btn-gray" onclick="salir()">🔒 Cerrar sesión en este celular</button>
   </div>
-
-  <div id="msg" class="msg"></div>
-
-  <div class="fila">
-    <input type="text" id="tracking" placeholder="Escribir o pistola…" onkeydown="onKey(event)" autocomplete="off">
-    <button class="btn btn-green btn-corto" onclick="registrar()">✓</button>
-  </div>
-
-  <div class="estado">
-    <div class="counter" id="cnt">0 <span>registrados</span></div>
-    <div id="pendientes"></div>
-  </div>
-  <div class="last" id="last"></div>
-
-  <hr class="divider">
-  <button class="btn btn-red" onclick="nuevaSesion()">↺ Nueva sesión / Cambiar motorizado</button>
-  <button class="btn btn-gray" onclick="salir()">🔒 Cerrar sesión en este celular</button>
-
-  </div> <!-- fin #app -->
 
   <div id="lector-foto" style="display:none"></div>
 
   <script>
     // ================= CONFIGURACIÓN =================
-    var API_URL = 'https://script.google.com/macros/s/AKfycbyiWjh-7sWrE5SvhJf9krF33_rPNJ_TwYQJsZfRHihk3XbAfX1mxWTHR4aDcvXK2f8O3w/exec';
-    var CLAVE = '1111';
+    // URL /exec de la app web de la hoja "Zonas de Paquetes" (NO la del registro)
+    var API_URL = 'PEGA_AQUI_LA_URL_EXEC_DE_ZONAS';
+    var CLAVE = '';
+    var COLORES = {
+      'Centro 1': '#1f5fbf', 'Centro 2': '#0b7a75', 'San Miguel': '#7a3fb0', 'Rinconada': '#b4451f',
+      'Capilla': '#2e7d32', 'SLD Puno': '#8a6d00', 'SLD AQP': '#ad1457', 'REVISAR': '#c77700'
+    };
 
-    // ==PURO== (sin pantalla; lo prueba tests/index.test.js)
-    // Formatos de 49 489 trackings reales. La MISMA expresión está en apps-script/registro/Codigo.gs: cambiar las dos.
+    // ==PURO== (sin pantalla; lo prueba tests/paginas.test.js)
+    // La MISMA expresión está en apps-script/zonas/Logica.js, apps-script/registro/Codigo.gs e index.html.
     var TRACKING_RE = /(?:^|[^A-Z0-9])(MLPE\d{9}R|MLPE\d{7}[RE]|MLAPE\d{9}TEM|[A-Z]{2}\d{9}[A-Z]{2})(?![A-Z0-9])/;
 
     function extraerTracking(texto) {
@@ -138,349 +99,214 @@
       return m ? m[1] : '';
     }
 
-    function decidir(motorizado, yaRegistrado) {
-      if (!motorizado) return {tipo: 'sinMotorizado'};
-      if (yaRegistrado) return {tipo: 'repetido'};
-      return {tipo: 'registrar'};
+    // info = [zona, motorizados de la zona, origen, entregado/asignado a, veces, dirección, distrito, cliente] → qué mostrar
+    function textoZona(info) {
+      if (!info) return {titulo: 'No está en Direcciones', sub: '', color: '#555', chico: true};
+      if (info[0] === 'SIN ANTECEDENTE') return {titulo: 'Sin antecedente', sub: 'Consultar', color: '#555', chico: true};
+      if (info[0] === 'REVISAR') return {titulo: 'Revisar: varias zonas', sub: '', color: COLORES.REVISAR, chico: true};
+      return {titulo: info[0], sub: info[1], color: COLORES[info[0]] || '#555', chico: false};
+    }
+
+    function textoOrigen(info) {
+      if (!info) return 'Agrega su control de carga en la hoja de Zonas y toca "Actualizar datos".';
+      if (info[2] === 'Entregado') return 'Este paquete ya fue entregado por: ' + info[3];
+      if (info[2] === 'Registro') return 'Asignado en el control a: ' + info[3];
+      var veces = ' (' + info[4] + (info[4] == 1 ? ' vez)' : ' veces)');
+      if (info[2] === 'Dirección') return 'Dirección ya fue entregada por: ' + info[3] + veces;
+      if (info[2] === 'Cliente') return 'Cliente ya recibió antes de: ' + info[3] + veces;
+      if (info[2] === 'Varias zonas') return 'Antes lo entregaron: ' + info[3] + '. Consulta antes de separar.';
+      return 'Nadie de la lista entregó antes a esta dirección ni a este cliente. Consulta antes de separar.';
+    }
+
+    function linkMaps(info) {
+      if (!info || !info[5]) return '';
+      return 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(info[5] + ', ' + (info[6] || 'Juliaca') + ', Puno, Perú');
     }
     // ==FIN PURO==
 
-    // ================= ALMACENAMIENTO LOCAL =================
-    function leerLS(k, def) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : def; } catch (e) { return def; } }
+    function leerLS(k, d) { try { var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } }
     function guardarLS(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
-    function borrarLS(k) { try { localStorage.removeItem(k); } catch (e) {} }
-    // La clave se guarda como texto simple (igual que la versión anterior, para no pedirla de nuevo)
-    function leerClaveGuardada() { try { return localStorage.getItem('claveScanner') || ''; } catch (e) { return ''; } }
-    function guardarClave(c) { try { localStorage.setItem('claveScanner', c); } catch (e) {} }
+    function leerClave() { try { return localStorage.getItem('claveZonas') || ''; } catch (e) { return ''; } }
+    function guardarClave(c) { try { localStorage.setItem('claveZonas', c); } catch (e) {} }
+    function borrarClave() { try { localStorage.removeItem('claveZonas'); } catch (e) {} }
 
-    // ================= ACCESO =================
-    function mostrarLogin(mensaje) {
-      document.getElementById('app').style.display = 'none';
-      document.getElementById('login').style.display = 'block';
-      var m = document.getElementById('msgLogin');
-      if (mensaje) { m.textContent = mensaje; m.className = 'msg err'; } else { m.className = 'msg'; }
-      document.getElementById('inputClave').focus();
+    function api(accion) {
+      return fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // evita bloqueo CORS
+        body: JSON.stringify({ accion: accion, clave: CLAVE })
+      }).then(function (r) { return r.json(); });
     }
 
-    function iniciarConClave(clave, desdeLogin) {
-      CLAVE = clave;
-      return api('motorizados').then(function (r) {
-        if (r.error) {
-          borrarLS('claveScanner');
-          mostrarLogin(desdeLogin ? 'Clave incorrecta' : '');
-          return;
-        }
-        guardarClave(clave);
-        cargarMotorizados(r.data);
-        document.getElementById('login').style.display = 'none';
-        document.getElementById('app').style.display = 'block';
-        procesarCola(); // envía lo que quedó pendiente de antes
-      }).catch(function () {
-        mostrarLogin('No se pudo conectar. Revisa tu internet.');
-      });
+    // ================= ACCESO =================
+    function mostrarLogin(m) {
+      document.getElementById('app').style.display = 'none';
+      document.getElementById('login').style.display = 'block';
+      var el = document.getElementById('msgLogin');
+      if (m) { el.textContent = m; el.className = 'msg err'; } else { el.className = 'msg'; }
+      document.getElementById('inputClave').focus();
     }
 
     function entrar() {
       var c = document.getElementById('inputClave').value.trim();
-      if (!c) return;
-      document.getElementById('msgLogin').className = 'msg';
-      iniciarConClave(c, true);
+      if (c) iniciar(c, true);
+    }
+
+    function iniciar(clave, desdeLogin) {
+      CLAVE = clave;
+      actualizarDatos(false).then(function (ok) {
+        if (ok === 'clave') { borrarClave(); mostrarLogin(desdeLogin ? 'Clave incorrecta' : ''); return; }
+        if (ok === 'red' && !Object.keys(DATOS).length) { mostrarLogin('No se pudo conectar. Revisa tu internet.'); return; }
+        guardarClave(clave);
+        document.getElementById('login').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+      });
     }
 
     function salir() {
       detenerCamara();
-      borrarLS('claveScanner');
+      borrarClave();
       CLAVE = '';
       document.getElementById('inputClave').value = '';
       mostrarLogin('');
     }
 
-    function api(accion, datos) {
-      var cuerpo = Object.assign({ accion: accion, clave: CLAVE }, datos || {});
-      return fetch(API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // evita bloqueo CORS
-        body: JSON.stringify(cuerpo)
-      }).then(function (res) { return res.json(); });
+    // ================= DATOS (se descargan una vez; buscar es instantáneo) =================
+    var DATOS = leerLS('datosZonas3', {});
+    var actualizado = leerLS('datosZonas3Hora', '');
+
+    function mostrarInfo() {
+      var n = Object.keys(DATOS).length;
+      document.getElementById('info').textContent = n ? n + ' paquetes cargados · actualizado ' + actualizado : 'Sin datos cargados';
     }
 
-    // ================= SONIDO =================
-    var audio = null;
+    // Devuelve 'ok', 'clave' o 'red'
+    function actualizarDatos(manual) {
+      return api('datos').then(function (r) {
+        if (r.error === 'Clave incorrecta') return 'clave';
+        if (r.error) throw new Error(r.error);
+        DATOS = r.data || {};
+        actualizado = new Date().toLocaleString('es-PE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+        guardarLS('datosZonas3', DATOS);
+        guardarLS('datosZonas3Hora', actualizado);
+        mostrarInfo();
+        if (manual) mostrarMsg('Datos actualizados', 'ok');
+        return 'ok';
+      }).catch(function () {
+        mostrarInfo();
+        if (manual) mostrarMsg('No se pudo actualizar (sin conexión). Se usan los datos guardados.', 'err');
+        return 'red';
+      });
+    }
+    setInterval(function () { if (CLAVE) actualizarDatos(false); }, 10 * 60 * 1000);
+
+    // ================= MOSTRAR =================
     function pitido(ok) {
       try {
-        audio = audio || new (window.AudioContext || window.webkitAudioContext)();
-        var o = audio.createOscillator(), g = audio.createGain();
-        o.frequency.value = ok ? 1200 : 300;
-        g.gain.value = 0.15;
-        o.connect(g); g.connect(audio.destination);
-        o.start(); o.stop(audio.currentTime + (ok ? 0.08 : 0.3));
+        var a = pitido.ctx = pitido.ctx || new (window.AudioContext || window.webkitAudioContext)();
+        var o = a.createOscillator(), g = a.createGain();
+        o.frequency.value = ok ? 1200 : 300; g.gain.value = 0.15;
+        o.connect(g); g.connect(a.destination); o.start(); o.stop(a.currentTime + (ok ? 0.08 : 0.3));
       } catch (e) {}
       if (navigator.vibrate) navigator.vibrate(ok ? 80 : [80, 60, 80]);
     }
 
-    // ================= CÁMARA =================
-    var scanner = null;
-    var camaraActiva = false;
-    var ultimoCodigo = '';
-    var ultimoTiempo = 0;
-
-    function enfocarTracking() {
-      if (!camaraActiva) document.getElementById('tracking').focus();
+    function mostrar(texto) {
+      var trk = extraerTracking(texto);
+      if (!trk) { pitido(false); mostrarMsg('Lectura no válida, vuelve a escanear: ' + String(texto).slice(0, 25), 'err'); return; }
+      ocultarMsg();
+      var info = DATOS[trk];
+      var z = textoZona(info);
+      var t = document.getElementById('tarjeta');
+      t.textContent = '';
+      var add = function (clase, txt) { var d = document.createElement('div'); d.className = clase; d.textContent = txt; t.appendChild(d); return d; };
+      add('trk', trk);
+      var caja = add('zona', z.titulo);
+      caja.style.background = z.color;
+      if (z.chico) caja.style.fontSize = '26px';
+      if (z.sub) { var sub = document.createElement('div'); sub.className = 'sub'; sub.textContent = z.sub; caja.appendChild(sub); }
+      if (info && info[5]) add('dir', info[5] + (info[6] ? ' – ' + info[6] : ''));
+      if (info && info[7]) add('cliente', 'Cliente: ' + info[7]);
+      add('origen', textoOrigen(info));
+      var url = linkMaps(info);
+      if (url) {
+        var a = document.createElement('a');
+        a.className = 'mapa'; a.href = url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = '📍 Ver en Google Maps';
+        t.appendChild(a);
+      }
+      pitido(!!info && !z.chico);
     }
 
-    // Solo formatos de etiquetas de paquetes: menos formatos = menos lecturas basura
+    function buscarEscrito() {
+      var c = document.getElementById('tracking');
+      if (c.value.trim()) mostrar(c.value);
+      c.value = '';
+    }
+
+    function mostrarMsg(txt, tipo) {
+      var el = document.getElementById('msg');
+      el.textContent = txt; el.className = 'msg ' + tipo;
+      clearTimeout(mostrarMsg.t);
+      if (tipo === 'ok') mostrarMsg.t = setTimeout(ocultarMsg, 2000);
+    }
+    function ocultarMsg() { document.getElementById('msg').className = 'msg'; }
+
+    // ================= CÁMARA =================
+    var scanner = null, camaraActiva = false, ultimo = '', ultimoMs = 0;
+
     function formatos() {
       var F = Html5QrcodeSupportedFormats;
       return [F.CODE_128, F.CODE_39, F.CODE_93, F.QR_CODE];
     }
 
-    function librariaCargada() {
-      if (typeof Html5Qrcode === 'undefined') {
-        mostrarMsg('No se pudo cargar el lector. Revisa tu conexión a internet.', 'err');
-        return false;
-      }
-      return true;
-    }
-
     function iniciarCamara() {
-      if (!librariaCargada() || camaraActiva) return;
+      if (typeof Html5Qrcode === 'undefined') { mostrarMsg('No se pudo cargar el lector. Revisa tu internet.', 'err'); return; }
+      if (camaraActiva) return;
       var visor = document.getElementById('lector-camara');
       visor.style.display = 'block';
       document.getElementById('btnDetener').style.display = 'block';
-
-      if (!scanner) {
-        scanner = new Html5Qrcode('lector-camara', {
-          formatsToSupport: formatos(),
-          experimentalFeatures: { useBarCodeDetectorIfSupported: true },
-          verbose: false
-        });
-      }
-      // Sin qrbox: lee en todo el cuadro (la franja recortada por CSS no desalinea la zona de lectura)
-      var config = { fps: 15, aspectRatio: 2.4 };
-
-      scanner.start({ facingMode: 'environment' }, config, function (codigo) {
-        if (preguntaActiva) return; // esperando que respondas el aviso
-        if (codigo === ultimoCodigo && Date.now() - ultimoTiempo < 3000) return; // mismo paquete aún frente a la cámara
-        ultimoCodigo = codigo;
-        ultimoTiempo = Date.now();
-        procesar(codigo);
+      scanner = scanner || new Html5Qrcode('lector-camara', {
+        formatsToSupport: formatos(), experimentalFeatures: { useBarCodeDetectorIfSupported: true }, verbose: false
+      });
+      scanner.start({ facingMode: 'environment' }, { fps: 15, aspectRatio: 2.4 }, function (codigo) {
+        if (codigo === ultimo && Date.now() - ultimoMs < 2500) return; // mismo paquete aún frente a la cámara
+        ultimo = codigo; ultimoMs = Date.now();
+        mostrar(codigo);
       }, function () {})
       .then(function () { camaraActiva = true; })
       .catch(function (err) {
         visor.style.display = 'none';
         document.getElementById('btnDetener').style.display = 'none';
-        var detalle = (err && (err.name || err.message)) ? (err.name + ': ' + err.message) : String(err);
-        var causa;
-        if (!window.isSecureContext) causa = 'La página no está en HTTPS.';
-        else if (/NotAllowed|Permission/i.test(detalle)) causa = 'Permiso de cámara bloqueado. Toca el candado de la barra de direcciones → Permisos → Cámara → Permitir, y recarga.';
-        else if (/NotFound|Overconstrained/i.test(detalle)) causa = 'No se encontró una cámara trasera.';
-        else if (/NotReadable|in use/i.test(detalle)) causa = 'Otra app está usando la cámara. Ciérrala y vuelve a intentar.';
-        else causa = 'No se pudo abrir la cámara.';
-        mostrarMsg(causa + ' [' + detalle + ']', 'err');
+        var d = (err && (err.name || err.message)) ? err.name + ': ' + err.message : String(err);
+        mostrarMsg((/NotAllowed|Permission/i.test(d) ? 'Permiso de cámara bloqueado: candado de la barra → Cámara → Permitir. ' : 'No se pudo abrir la cámara. ') + '[' + d + ']', 'err');
       });
     }
 
     function detenerCamara() {
-      var visor = document.getElementById('lector-camara');
-      var ocultar = function () {
+      var fin = function () {
         camaraActiva = false;
-        visor.style.display = 'none';
+        document.getElementById('lector-camara').style.display = 'none';
         document.getElementById('btnDetener').style.display = 'none';
       };
-      if (scanner && camaraActiva) return scanner.stop().then(ocultar).catch(ocultar);
-      ocultar();
-      return Promise.resolve();
+      if (scanner && camaraActiva) return scanner.stop().then(fin).catch(fin);
+      fin();
     }
 
-    function abrirFoto() {
-      if (!librariaCargada()) return;
-      document.getElementById('inputFoto').click();
-    }
+    function abrirFoto() { document.getElementById('inputFoto').click(); }
 
     function leerFoto(e) {
-      var archivo = e.target.files && e.target.files[0];
-      if (!archivo) return;
-      mostrarMsg('Leyendo código...', 'warn');
-      var lectorFoto = new Html5Qrcode('lector-foto', {
-        formatsToSupport: formatos(),
-        experimentalFeatures: { useBarCodeDetectorIfSupported: true },
-        verbose: false
-      });
-      lectorFoto.scanFile(archivo, false)
-        .then(function (codigo) { ocultarMsg(); procesar(codigo); })
+      var f = e.target.files && e.target.files[0];
+      if (!f || typeof Html5Qrcode === 'undefined') return;
+      var lector = new Html5Qrcode('lector-foto', { formatsToSupport: formatos(), experimentalFeatures: { useBarCodeDetectorIfSupported: true }, verbose: false });
+      lector.scanFile(f, false).then(mostrar)
         .catch(function () { mostrarMsg('No se detectó el código. Acércate más y que salga nítido.', 'err'); })
-        .finally(function () {
-          try { lectorFoto.clear(); } catch (x) {}
-          e.target.value = '';
-        });
+        .finally(function () { try { lector.clear(); } catch (x) {} e.target.value = ''; });
     }
-
-    // ================= PREGUNTAS (avisos con Sí / Cancelar) =================
-    var preguntas = [];
-    var preguntaActiva = null;
-
-    function preguntar(texto, textoSi, alResponder) {
-      preguntas.push({ texto: texto, si: textoSi, fn: alResponder });
-      if (!preguntaActiva) siguientePregunta();
-    }
-
-    function siguientePregunta() {
-      preguntaActiva = preguntas.shift() || null;
-      var box = document.getElementById('confirmBox');
-      if (!preguntaActiva) { box.style.display = 'none'; enfocarTracking(); return; }
-      document.getElementById('confirmMsg').textContent = preguntaActiva.texto;
-      document.getElementById('confirmSi').textContent = preguntaActiva.si;
-      box.style.display = 'block';
-      pitido(false);
-    }
-
-    function responder(si) {
-      var p = preguntaActiva;
-      if (p) p.fn(si);
-      siguientePregunta();
-    }
-
-    // ================= REGISTRO =================
-    var registradosSesion = {};
-    var count = 0;
-
-    function cargarMotorizados(lista) {
-      var sel = document.getElementById('motorizado');
-      sel.length = 1;
-      lista.forEach(function (m) {
-        var opt = document.createElement('option');
-        opt.value = m.nombre;
-        opt.text = m.nombre + ' — ' + m.zona;
-        opt.dataset.zona = m.zona;
-        sel.appendChild(opt);
-      });
-    }
-
-    function onSelectMotorizado() { enfocarTracking(); }
-
-    function onKey(e) { if (e.key === 'Enter') registrar(); }
-
-    function getZonaSeleccionada() {
-      var sel = document.getElementById('motorizado');
-      var opt = sel.options[sel.selectedIndex];
-      return opt && opt.dataset.zona ? opt.dataset.zona : '';
-    }
-
-    // Botón ✓ / Enter / pistola: procesa lo escrito en el campo
-    function registrar() {
-      var campo = document.getElementById('tracking');
-      var texto = campo.value;
-      campo.value = '';
-      if (!texto.trim()) { mostrarMsg('Escanea o escribe un tracking', 'err'); return; }
-      procesar(texto);
-    }
-
-    function procesar(texto) {
-      var trk = extraerTracking(texto);
-      if (!trk) {
-        pitido(false);
-        mostrarMsg('Lectura no válida, vuelve a escanear: ' + String(texto).slice(0, 25), 'err');
-        return;
-      }
-      var mot = document.getElementById('motorizado').value;
-      var zonaMot = getZonaSeleccionada();
-      var d = decidir(mot, !!registradosSesion[trk]);
-      if (d.tipo === 'sinMotorizado') { pitido(false); mostrarMsg('Selecciona un motorizado primero', 'err'); return; }
-      if (d.tipo === 'repetido') { pitido(false); mostrarMsg(trk + ' ya está registrado en esta sesión', 'warn'); return; }
-      encolar('registrar', trk, mot, zonaMot);
-    }
-
-    // ================= COLA: registra al instante y guarda en segundo plano =================
-    var cola = leerLS('colaScanner', []);
-    var enviando = false;
-
-    function encolar(accion, trk, mot, zona) {
-      registradosSesion[trk] = true;
-      count++;
-      document.getElementById('cnt').innerHTML = count + ' <span>registrados</span>';
-      document.getElementById('last').textContent = 'Último: ' + trk + ' → ' + mot;
-      pitido(true);
-      mostrarMsg('✓ ' + trk + ' → ' + mot, 'ok');
-      cola.push({ accion: accion, tracking: trk, motorizado: mot, zona: zona });
-      guardarLS('colaScanner', cola); // si se cierra la página, se envía al volver a abrir
-      procesarCola();
-    }
-
-    function quitarDeSesion(trk) {
-      delete registradosSesion[trk];
-      count = Math.max(0, count - 1);
-      document.getElementById('cnt').innerHTML = count + ' <span>registrados</span>';
-    }
-
-    function actualizarPendientes() {
-      document.getElementById('pendientes').textContent = cola.length ? '⏳ ' + cola.length + ' por guardar' : '';
-    }
-
-    function procesarCola() {
-      actualizarPendientes();
-      if (enviando || !cola.length || !CLAVE) return;
-      enviando = true;
-      var item = cola[0];
-      api(item.accion, { motorizado: item.motorizado, zona: item.zona, tracking: item.tracking })
-        .then(function (r) {
-          if (r.error === 'Clave incorrecta') { enviando = false; salir(); return; } // la cola se conserva
-          cola.shift();
-          guardarLS('colaScanner', cola);
-          if (r.ok) {
-            if (r.mensaje) mostrarMsg(r.mensaje, 'ok');
-          } else if (r.duplicate) {
-            quitarDeSesion(item.tracking);
-            preguntar(item.tracking + ' ya está asignado a ' + r.asignadoA + '. ¿Devolver y reasignar a ' + item.motorizado + '?',
-              'Sí, reasignar', function (si) { if (si) encolar('reasignar', item.tracking, item.motorizado, item.zona); });
-          } else {
-            quitarDeSesion(item.tracking);
-            pitido(false);
-            mostrarMsg('No se guardó ' + item.tracking + ': ' + (r.error || 'error'), 'err');
-          }
-          enviando = false;
-          procesarCola();
-        })
-        .catch(function () {
-          // Sin conexión: se queda en la cola y se reintenta
-          enviando = false;
-          actualizarPendientes();
-          document.getElementById('pendientes').textContent = '⚠ ' + cola.length + ' sin guardar (sin conexión, reintentando)';
-          setTimeout(procesarCola, 4000);
-        });
-    }
-
-    function nuevaSesion() {
-      detenerCamara();
-      ultimoCodigo = '';
-      count = 0;
-      registradosSesion = {};
-      document.getElementById('cnt').innerHTML = '0 <span>registrados</span>';
-      document.getElementById('motorizado').value = '';
-      document.getElementById('tracking').value = '';
-      document.getElementById('last').textContent = '';
-      ocultarMsg();
-      document.getElementById('motorizado').focus();
-    }
-
-    var timerMsg = null;
-    function mostrarMsg(txt, tipo) {
-      var el = document.getElementById('msg');
-      el.textContent = txt;
-      el.className = 'msg ' + tipo;
-      clearTimeout(timerMsg);
-      if (tipo === 'ok') timerMsg = setTimeout(ocultarMsg, 2000);
-    }
-
-    function ocultarMsg() { document.getElementById('msg').className = 'msg'; }
-
-    window.addEventListener('beforeunload', function (e) {
-      if (cola.length) { e.preventDefault(); e.returnValue = ''; } // avisa si quedan paquetes sin guardar
-    });
 
     window.onload = function () {
-      var guardada = leerClaveGuardada();
-      if (guardada) iniciarConClave(guardada, false);
-      else mostrarLogin('');
+      mostrarInfo();
+      var c = leerClave();
+      if (c) iniciar(c, false); else mostrarLogin('');
     };
   </script>
 </body>
